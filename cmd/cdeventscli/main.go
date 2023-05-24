@@ -11,7 +11,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "podcli",
+	Use:   "cdeventscli",
 	Short: "cdevents-controller command line",
 	Long: `
 cdevents-controller command line utilities`,

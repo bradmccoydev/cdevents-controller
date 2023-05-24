@@ -21,7 +21,7 @@ test:
 
 build:
 	GIT_COMMIT=$$(git rev-list -1 HEAD) && CGO_ENABLED=0 go build  -ldflags "-s -w -X github.com/bradmccoydev/cdevents-controller/pkg/version.REVISION=$(GIT_COMMIT)" -a -o ./bin/cdevents-controller ./cmd/cdevents-controller/*
-	GIT_COMMIT=$$(git rev-list -1 HEAD) && CGO_ENABLED=0 go build  -ldflags "-s -w -X github.com/bradmccoydev/cdevents-controller/pkg/version.REVISION=$(GIT_COMMIT)" -a -o ./bin/podcli ./cmd/podcli/*
+	GIT_COMMIT=$$(git rev-list -1 HEAD) && CGO_ENABLED=0 go build  -ldflags "-s -w -X github.com/bradmccoydev/cdevents-controller/pkg/version.REVISION=$(GIT_COMMIT)" -a -o ./bin/cdeventscli ./cmd/cdeventscli/*
 
 tidy:
 	rm -f go.sum; go mod tidy -compat=1.19

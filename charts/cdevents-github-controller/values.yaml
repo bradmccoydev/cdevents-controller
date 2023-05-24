@@ -117,10 +117,6 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-linkerd:
-  profile:
-    enabled: false
-
 # create Prometheus Operator monitor
 serviceMonitor:
   enabled: false

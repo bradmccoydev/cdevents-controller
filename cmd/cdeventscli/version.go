@@ -13,7 +13,7 @@ func init() {
 
 var versionCmd = &cobra.Command{
 	Use:   `version`,
-	Short: "Prints podcli version",
+	Short: "Prints cdeventscli version",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println(version.VERSION)
 		return nil

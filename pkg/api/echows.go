@@ -19,7 +19,7 @@ var wsCon = websocket.Upgrader{}
 // @Produce json
 // @Router /ws/echo [post]
 // @Success 202 {object} api.MapResponse
-// Test: go run ./cmd/podcli/* ws localhost:9898/ws/echo
+// Test: go run ./cmd/cdeventscli/* ws localhost:9898/ws/echo
 func (s *Server) echoWsHandler(w http.ResponseWriter, r *http.Request) {
 	c, err := wsCon.Upgrade(w, r, nil)
 	if err != nil {

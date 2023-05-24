@@ -71,7 +71,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - podcli
+            - cdeventscli
             - check
             - http
             - localhost:9898/healthz
@@ -80,7 +80,7 @@ spec:
         readinessProbe:
           exec:
             command:
-            - podcli
+            - cdeventscli
             - check
             - http
             - localhost:9898/readyz
