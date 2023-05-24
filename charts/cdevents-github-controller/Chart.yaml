@@ -1,0 +1,13 @@
+apiVersion: v1
+version: 0.0.1
+appVersion: 0.0.1
+name: cdevents-controller
+engine: gotpl
+description: CDEvents Github Contoller Helm Chart
+home: https://github.com/bradmccoydev/cdevents-controller
+maintainers:
+- email: bradmccoydev@users.noreply.github.com
+  name: bradmccoydev
+sources:
+- https://github.com/bradmccoydev/cdevents-controller
+kubeVersion: ">=1.23.0-0"

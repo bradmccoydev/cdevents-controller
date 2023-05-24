@@ -1,0 +1,60 @@
+# cdevents-controller CUE module
+
+This directory contains a [CUE](https://cuelang.org/docs/) module and tooling
+for generating cdevents-controller's Kubernetes resources.
+
+The module contains a `cdevents-controller.#Application` definition which takes `cdevents-controller.#Config` as input.
+
+## Prerequisites
+
+Install CUE with:
+
+```shell
+brew install cue
+```
+
+Generate the Kubernetes API definitions required by this module with:
+
+```shell
+go mod init github.com/bradmccoydev/cdevents-controller/cue
+go get k8s.io/api/...
+cue get go k8s.io/api/...
+```
+
+## Configuration
+
+Configure the application in `main.cue`:
+
+```cue
+app: cdevents-controller.#Application & {
+	config: {
+		meta: {
+			name:      "cdevents-controller"
+			namespace: "default"
+		}
+		image: tag: "6.1.3"
+		resources: requests: {
+			cpu:    "100m"
+			memory: "16Mi"
+		}
+		hpa: {
+			enabled:     true
+			maxReplicas: 3
+		}
+		ingress: {
+			enabled:   true
+			className: "nginx"
+			host:      "cdevents-controller.example.com"
+			tls:       true
+			annotations: "cert-manager.io/cluster-issuer": "letsencrypt"
+		}
+		serviceMonitor: enabled: true
+	}
+}
+```
+
+## Generate the manifests
+
+```shell
+cue gen
+```
