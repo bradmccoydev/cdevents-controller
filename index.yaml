@@ -1,0 +1,33 @@
+apiVersion: v1
+entries:
+  cdevents-controller:
+  - annotations:
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: support
+          url: https://github.com/bradmccoydev/cdevevents-controller/issues/new
+        - name: docs
+          url: https://blog.bradmccoy.io/
+      artifacthub.io/signKey: "fingerprint: 91BF31657FB6BB5931CBFCF92A544B84946E3621\nurl:
+        https://keybase.io/bradmccoydev/pgp_keys.asc \n"
+    apiVersion: v1
+    appVersion: 0.0.1
+    created: "2023-05-25T04:20:52.659591463Z"
+    description: CDEvents Github Contoller Helm Chart
+    digest: 64219a997cac16878b68807e87252e999e86263bf7785e3f576b5a5494e79bdd
+    home: https://github.com/bradmccoydev/cdevents-controller
+    keywords:
+    - cloud-native
+    - cdevents
+    - cd
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: bradmccoydev@users.noreply.github.com
+      name: bradmccoydev
+    name: cdevents-controller
+    sources:
+    - https://github.com/bradmccoydev/cdevents-controller
+    urls:
+    - https://github.com/bradmccoydev/cdevents-controller/releases/download/cdevents-controller-0.0.2/cdevents-controller-0.0.2.tgz
+    version: 0.0.2
+generated: "2023-05-25T04:20:52.659763572Z"
