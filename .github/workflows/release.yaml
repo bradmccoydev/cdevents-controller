@@ -82,21 +82,6 @@ jobs:
           helm package charts/cdevents-controller
           helm push cdevents-controller-${{ steps.prep.outputs.VERSION }}.tgz oci://ghcr.io/bradmccoydev/charts
           rm cdevents-controller-${{ steps.prep.outputs.VERSION }}.tgz
-      - name: Publish Flux OCI artifact to GHCR
-        run: |
-          flux push artifact oci://ghcr.io/bradmccoydev/manifests/cdevents-controller:${{ steps.prep.outputs.VERSION }} \
-            --path="./kustomize" \
-            --source="${{ github.event.repository.html_url }}" \
-            --revision="${GITHUB_REF_NAME}/${GITHUB_SHA}"
-          flux tag artifact oci://ghcr.io/bradmccoydev/manifests/cdevents-controller:${{ steps.prep.outputs.VERSION }} --tag latest
-      - name: Sign OCI artifacts
-        env:
-          COSIGN_EXPERIMENTAL: 1
-        run: |
-          cosign sign docker.io/bradmccoydev/cdevents-controller:${{ steps.prep.outputs.VERSION }} --yes
-          cosign sign ghcr.io/bradmccoydev/cdevents-controller:${{ steps.prep.outputs.VERSION }} --yes
-          cosign sign ghcr.io/bradmccoydev/charts/cdevents-controller:${{ steps.prep.outputs.VERSION }} --yes
-          cosign sign ghcr.io/bradmccoydev/manifests/cdevents-controller:${{ steps.prep.outputs.VERSION }} --yes
       - name: Publish base image
         uses: docker/build-push-action@v3
         with:

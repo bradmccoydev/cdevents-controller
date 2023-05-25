@@ -11,7 +11,9 @@ RUN go mod download
 
 COPY ./ ./
 
-RUN go build -o /workspace/cdevents-controller -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" ./ 
+RUN go build -ldflags "-s -w \
+    -X github.com/bradmccoydev/cdevents-controller/pkg/version.REVISION=${REVISION}" \
+    -a -o /workspace/cdevents-controller cmd/cdevents-controller/*
 
 FROM gcr.io/distroless/static AS production
 
@@ -25,4 +27,4 @@ WORKDIR /
 COPY --from=builder /workspace/cdevents-controller .
 USER 65532:65532
 
-ENTRYPOINT ["/cdevents-controller"]
+ENTRYPOINT ["/k8sgpt"]
