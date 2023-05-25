@@ -27,4 +27,4 @@ WORKDIR /
 COPY --from=builder /workspace/cdevents-controller .
 USER 65532:65532
 
-ENTRYPOINT ["/k8sgpt"]
+ENTRYPOINT ["/cdevents-controller"]

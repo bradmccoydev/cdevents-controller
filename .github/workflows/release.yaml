@@ -2,123 +2,97 @@ name: release
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - main
 
 permissions:
-  contents: write # needed to write releases
-  id-token: write # needed for keyless signing
-  packages: write # needed for ghcr access
+  id-token: write
+  contents: write
+  packages: write
+  security-events: write
+  actions: read
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+
+  build:
+    runs-on: ubuntu-22.04
+
+    env:
+      IMAGE_NAME: bradmccoydev/cdevents-controller
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: sigstore/cosign-installer@v3
-      - uses: fluxcd/flux2/action@main
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.20.x
-      - name: Setup Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.10.3
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: all
-      - name: Setup Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.GHCR_TOKEN }}
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Prepare
-        id: prep
-        run: |
-          VERSION=sha-${GITHUB_SHA::8}
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF/refs\/tags\//}
-          fi
-          echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-          echo "REVISION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
-      - name: Generate images meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            docker.io/bradmccoydev/cdevents-controller
-            ghcr.io/bradmccoydev/cdevents-controller
-          tags: |
-            type=raw,value=${{ steps.prep.outputs.VERSION }}
-            type=raw,value=latest
-      - name: Publish multi-arch image
-        uses: docker/build-push-action@v3
-        with:
-          sbom: true
-          provenance: true
-          push: true
-          builder: ${{ steps.buildx.outputs.name }}
-          context: .
-          file: ./Dockerfile.xx
-          build-args: |
-            REVISION=${{ steps.prep.outputs.REVISION }}
-          platforms: linux/amd64,linux/arm/v7,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-      - name: Publish Helm chart to GHCR
-        run: |
-          helm package charts/cdevents-controller
-          helm push cdevents-controller-${{ steps.prep.outputs.VERSION }}.tgz oci://ghcr.io/bradmccoydev/charts
-          rm cdevents-controller-${{ steps.prep.outputs.VERSION }}.tgz
-      - name: Publish base image
-        uses: docker/build-push-action@v3
-        with:
-          push: true
-          builder: ${{ steps.buildx.outputs.name }}
-          context: .
-          platforms: linux/amd64
-          file: ./Dockerfile.base
-          tags: docker.io/bradmccoydev/cdevents-controller-base:latest
-      - name: Publish helm chart
-        uses: bradmccoydev/helm-gh-pages@master
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish config artifact
-        run: |
-          flux push artifact oci://ghcr.io/bradmccoydev/cdevents-controller-deploy:${{ steps.prep.outputs.VERSION }} \
-            --path="./kustomize" \
-            --source="${{ github.event.repository.html_url }}" \
-            --revision="${GITHUB_REF_NAME}/${GITHUB_SHA}"
-          flux tag artifact oci://ghcr.io/bradmccoydev/cdevents-controller-deploy:${{ steps.prep.outputs.VERSION }} --tag latest
-      - name: Sign config artifact
-        run: |
-          echo "$COSIGN_KEY" > /tmp/cosign.key
-          cosign sign -key /tmp/cosign.key ghcr.io/bradmccoydev/cdevents-controller-deploy:${{ steps.prep.outputs.VERSION }} --yes
-          cosign sign -key /tmp/cosign.key ghcr.io/bradmccoydev/cdevents-controller-deploy:latest --yes
-        env:
-          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
-          COSIGN_KEY: ${{secrets.COSIGN_KEY}}
-      - uses: ./.github/actions/release-notes
-      - name: Generate release notes
-        run: |
-          echo 'CHANGELOG' > /tmp/release.txt
-          github-release-notes -org bradmccoydev -repo cdevents-controller -since-latest-release >> /tmp/release.txt
-      - name: Publish release
-        uses: goreleaser/goreleaser-action@v4
-        with:
-          version: latest
-          args: release --release-notes=/tmp/release.txt --skip-validate
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3
+    - uses: sigstore/cosign-installer@dd6b2e2b610a11fd73dd187a43d57cc1394e35f9 # v3.0.5
+
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@4b4e9c3e2d4531116a6f8ba8e71fc6e2cb6e6c8c # v2.5.0
+
+    - name: Login to GitHub Container registry
+      uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
+      env:
+        GITHUB_USER: ${{ github.actor }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ env.GITHUB_TOKEN }}
+    
+    - name: Prepare
+      id: prep
+      run: |
+        VERSION=sha-${GITHUB_SHA::8}
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF/refs\/tags\//}
+        fi
+        echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+        echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+        echo "REVISION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+
+    - name: Generate images meta
+      id: meta
+      uses: docker/metadata-action@c4ee3adeed93b1fa6a762f209fb01608c1a22f1e
+      with:
+        images: |
+          docker.io/${{ env.IMAGE_NAME }}
+          ghcr.io/${{ env.IMAGE_NAME }}
+        tags: |
+          type=raw,value=${{ steps.prep.outputs.VERSION }}
+          type=raw,value=latest
+    
+    - name: Build Docker Image
+      id: docker_build_image
+      uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671 # v4
+      with:
+        sbom: true
+        provenance: true
+        push: true
+        builder: ${{ steps.buildx.outputs.name }}
+        context: .
+        file: ./Dockerfile
+        platforms: linux/amd64,linux/arm64
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+            REVISION=${{ steps.prep.outputs.REVISION }}      
+    
+    - name: Sign container image
+      env:
+        IMAGE_DIGEST: ${{ steps.docker_build_image.outputs.digest }}
+        COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
+        COSIGN_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
+      run: |
+        cosign sign ghcr.io/bradmccoydev/cdevents-controller:${{ steps.prep.outputs.VERSION }} --yes
+
+    # - name: Generate SBOM
+    #   uses: anchore/sbom-action@4d571ad1038a9cc29d676154ef265ab8f9027042 # v0.14.2
+    #   with:
+    #     image: ghcr.io/bradmccoydev/cdevents-controller:0.0.1
+    #     artifact-name: sbom-cdevents-controller-0.0.1.json
+    #     output-file: ./sbom-cdevents-controller-0.0.1.spdx.json
+  
+    # - name: Attach SBOM to release
+    #   uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
+    #   with:
+    #     tag_name: 0.0.1
+    #     files: ./sbom-app-release-0.0.1.spdx.json

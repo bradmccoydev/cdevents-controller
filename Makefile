@@ -45,7 +45,7 @@ build-xx:
 	--platform=linux/amd64 \
 	-t $(DOCKER_IMAGE_NAME):$(VERSION) \
 	--load \
-	-f Dockerfile.xx .
+	-f Dockerfile .
 
 build-base:
 	docker build -f Dockerfile.base -t $(DOCKER_REPOSITORY)/cdevents-controller-base:latest .
