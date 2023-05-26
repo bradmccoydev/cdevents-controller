@@ -15,6 +15,10 @@ RUN go build -ldflags "-s -w \
     -X github.com/bradmccoydev/cdevents-controller/pkg/version.REVISION=${REVISION}" \
     -a -o /workspace/cdevents-controller cmd/cdevents-controller/*
 
+RUN go build -ldflags "-s -w \
+    -X github.com/bradmccoydev/cdevents-controller/pkg/version.REVISION=${REVISION}" \
+    -a -o /workspace/cdeventscli cmd/cdeventscli/*
+
 FROM gcr.io/distroless/static AS production
 
 LABEL org.opencontainers.image.source="https://github.com/bradmccoydev/cdevents-controller" \
@@ -25,6 +29,7 @@ LABEL org.opencontainers.image.source="https://github.com/bradmccoydev/cdevents-
 
 WORKDIR /
 COPY --from=builder /workspace/cdevents-controller .
+COPY --from=builder /workspace/cdeventscli .
 USER 65532:65532
 
 ENTRYPOINT ["/cdevents-controller"]
