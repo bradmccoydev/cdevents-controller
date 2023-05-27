@@ -63,8 +63,6 @@ jobs:
       id: docker_build_image
       uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671 # v4
       with:
-        sbom: true
-        provenance: true
         push: true
         builder: ${{ steps.buildx.outputs.name }}
         context: .
@@ -81,7 +79,9 @@ jobs:
         COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
         COSIGN_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
       run: |
+        cosign sign ghcr.io/bradmccoydev/cdevents-controller:latest --yes
         cosign sign ghcr.io/bradmccoydev/cdevents-controller:${{ steps.prep.outputs.VERSION }} --yes
+
 
     # - name: Generate SBOM
     #   uses: anchore/sbom-action@4d571ad1038a9cc29d676154ef265ab8f9027042 # v0.14.2

@@ -25,11 +25,13 @@ LABEL org.opencontainers.image.source="https://github.com/bradmccoydev/cdevents-
     org.opencontainers.image.url="https://avatars.githubusercontent.com/u/91484128?s=200&v=4" \
     org.opencontainers.image.title="CDEvents Github Controller" \
     org.opencontainers.image.vendor='bradmccoydev' \
-    org.opencontainers.image.licenses='Apache-2.0'
+    org.opencontainers.image.licenses='Apache-2.0' \
+    org.opencontainers.image.description='CDEvents Controller'
 
 WORKDIR /
 COPY --from=builder /workspace/cdevents-controller .
-COPY --from=builder /workspace/cdeventscli .
+COPY --from=builder /workspace/cdeventscli /usr/local/bin/cdeventscli
+COPY ./ui ./ui
 USER 65532:65532
 
 ENTRYPOINT ["/cdevents-controller"]
