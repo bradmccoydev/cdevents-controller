@@ -8,7 +8,7 @@ processors:
 
 exporters:
   jaeger:
-    endpoint: jaeger:14250
+    endpoint: jaeger-tracing-collector:14250
     tls:
       insecure: true
 

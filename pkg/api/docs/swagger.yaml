@@ -50,7 +50,7 @@ info:
     url: https://github.com/bradmccoydev/cdevents-controller
   description: Go microservice template for Kubernetes.
   license:
-    name: MIT License
+    name: Apache2 License
     url: https://github.com/bradmccoydev/cdevents-controller/blob/master/LICENSE
   title: cdevents-controller API
   version: "2.0"
@@ -66,6 +66,21 @@ paths:
           schema:
             type: string
       summary: Index
+      tags:
+      - HTTP API
+  /api/cdevent/{key}:
+    post:
+      consumes:
+      - application/json
+      description: Receive CDEvent
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.RuntimeResponse'
+      summary: Runtime information
       tags:
       - HTTP API
   /api/echo:

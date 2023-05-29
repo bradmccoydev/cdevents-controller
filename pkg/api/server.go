@@ -32,7 +32,7 @@ import (
 // @contact.name Source Code
 // @contact.url https://github.com/bradmccoydev/cdevents-controller
 
-// @license.name MIT License
+// @license.name Apache2 License
 // @license.url https://github.com/bradmccoydev/cdevents-controller/blob/master/LICENSE
 
 // @host localhost:9898
@@ -119,6 +119,7 @@ func (s *Server) registerHandlers() {
 	s.router.HandleFunc("/token", s.tokenGenerateHandler).Methods("POST")
 	s.router.HandleFunc("/token/validate", s.tokenValidateHandler).Methods("GET")
 	s.router.HandleFunc("/api/info", s.infoHandler).Methods("GET")
+	s.router.HandleFunc("/api/cdevent/{key}", s.cdEventHandler).Methods("POST")
 	s.router.HandleFunc("/api/echo", s.echoHandler).Methods("POST")
 	s.router.HandleFunc("/ws/echo", s.echoWsHandler)
 	s.router.HandleFunc("/chunked", s.chunkedHandler)

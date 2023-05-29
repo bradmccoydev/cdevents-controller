@@ -73,13 +73,12 @@ version-set:
 	/usr/bin/sed -i '' "s/tag: $$current/tag: $$next/g" charts/cdevents-controller/values-prod.yaml && \
 	/usr/bin/sed -i '' "s/appVersion: $$current/appVersion: $$next/g" charts/cdevents-controller/Chart.yaml && \
 	/usr/bin/sed -i '' "s/version: $$current/version: $$next/g" charts/cdevents-controller/Chart.yaml && \
-	/usr/bin/sed -i '' "s/cdevents-controller:$$current/cdevents-controller:$$next/g" kustomize/deployment.yaml && \
 	/usr/bin/sed -i '' "s/cdevents-controller:$$current/cdevents-controller:$$next/g" deploy/webapp/frontend/deployment.yaml && \
 	/usr/bin/sed -i '' "s/cdevents-controller:$$current/cdevents-controller:$$next/g" deploy/webapp/backend/deployment.yaml && \
 	/usr/bin/sed -i '' "s/cdevents-controller:$$current/cdevents-controller:$$next/g" deploy/bases/frontend/deployment.yaml && \
 	/usr/bin/sed -i '' "s/cdevents-controller:$$current/cdevents-controller:$$next/g" deploy/bases/backend/deployment.yaml && \
 	/usr/bin/sed -i '' "s/$$current/$$next/g" cue/main.cue && \
-	echo "Version $$next set in code, deployment, chart and kustomize"
+	echo "Version $$next set in code, deployment and chart"
 
 release:
 	git tag $(VERSION)

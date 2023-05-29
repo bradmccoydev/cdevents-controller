@@ -88,6 +88,11 @@ spec:
             - --h2c
             {{- end }}
           env:
+          - name: cdevents-controller_MONGODB_URL
+            valueFrom:
+              secretKeyRef:
+                name: mongodb
+                key: mongodb-url
           {{- if .Values.ui.message }}
           - name: cdevents-controller_UI_MESSAGE
             value: {{ quote .Values.ui.message }}

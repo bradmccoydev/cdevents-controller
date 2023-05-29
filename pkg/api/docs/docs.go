@@ -15,7 +15,7 @@ const docTemplate = `{
             "url": "https://github.com/bradmccoydev/cdevents-controller"
         },
         "license": {
-            "name": "MIT License",
+            "name": "Apache2 License",
             "url": "https://github.com/bradmccoydev/cdevents-controller/blob/master/LICENSE"
         },
         "version": "{{.Version}}"
@@ -38,6 +38,29 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/cdevent/{key}": {
+            "post": {
+                "description": "Receive CDEvent",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HTTP API"
+                ],
+                "summary": "Runtime information",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.RuntimeResponse"
                         }
                     }
                 }
