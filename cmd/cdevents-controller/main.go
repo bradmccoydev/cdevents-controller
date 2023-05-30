@@ -76,6 +76,7 @@ func main() {
 	viper.RegisterAlias("backendUrl", "backend-url")
 	hostname, _ := os.Hostname()
 	viper.SetDefault("jwt-secret", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
+	viper.SetDefault("mongodb-url", "mongodb://mongodb-headless:27017")
 	viper.SetDefault("ui-logo", "https://raw.githubusercontent.com/bradmccoydev/cdevents-controller/gh-pages/cuddle_clap.gif")
 	viper.Set("hostname", hostname)
 	viper.Set("version", version.VERSION)

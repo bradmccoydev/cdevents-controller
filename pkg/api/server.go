@@ -72,6 +72,7 @@ type Config struct {
 	Unready               bool          `mapstructure:"unready"`
 	JWTSecret             string        `mapstructure:"jwt-secret"`
 	CacheServer           string        `mapstructure:"cache-server"`
+	MongodbURL            string        `mapstructure:"mongodb-url"`
 }
 
 type Server struct {

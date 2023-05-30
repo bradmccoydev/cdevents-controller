@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"gopkg.in/yaml.v3"
 )
 
 // Info godoc
@@ -33,7 +34,12 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongodb-headless:27017/cdevents?ssl=false"))
+	var cdevent CDEvent
+	if err := yaml.Unmarshal(body, &cdevent); err != nil {
+		log.Fatal(err)
+	}
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(s.config.MongodbURL))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,36 +61,29 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 	db := client.Database("cdevents")
 	collection := db.Collection("items")
 
-	cdevent := CDEvent{
-		SubjectID:        "1",
-		SubjectSource:    "2",
-		SubjectType:      "3",
-		SubjectContent:   "4",
-		ContextVersion:   "5",
-		ContextID:        "6",
-		ContextSource:    "7",
-		ContextType:      "8",
-		ContextTimestamp: "9",
-	}
-
-	_, err = collection.InsertOne(ctx, cdevent)
+	result, err := collection.InsertOne(ctx, cdevent)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Item inserted successfully! %s", key)
+	fmt.Printf("Inserted document with _id: %v\n", result.InsertedID)
 
 	s.JSONResponse(w, r, body)
 }
 
 type CDEvent struct {
-	SubjectID        string `json:"subjectId"`
-	SubjectSource    string `json:"subjectSource"`
-	SubjectType      string `json:"subjectType"`
-	SubjectContent   string `json:"subjectContent"`
-	ContextVersion   string `json:"contextVersion"`
-	ContextID        string `json:"contextId"`
-	ContextSource    string `json:"contextSource"`
-	ContextType      string `json:"contextType"`
-	ContextTimestamp string `json:"contextTimestamp"`
+	Context struct {
+		Version   string    `json:"version"`
+		ID        string    `json:"id"`
+		Source    string    `json:"source"`
+		Type      string    `json:"type"`
+		Timestamp time.Time `json:"timestamp"`
+	} `json:"context"`
+	Subject struct {
+		ID      string `json:"id"`
+		Source  string `json:"source"`
+		Type    string `json:"type"`
+		Content struct {
+		} `json:"content"`
+	} `json:"subject"`
 }

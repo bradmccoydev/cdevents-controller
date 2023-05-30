@@ -13,7 +13,7 @@ EXTRA_RUN_ARGS?=
 run:
 	go run -ldflags "-s -w -X github.com/bradmccoydev/cdevents-controller/pkg/version.REVISION=$(GIT_COMMIT)" cmd/cdevents-controller/* \
 	--level=debug --grpc-port=9999 --backend-url=https://httpbin.org/status/401 --backend-url=https://httpbin.org/status/500 \
-	--ui-logo=https://raw.githubusercontent.com/bradmccoydev/cdevents-controller/gh-pages/cuddle_clap.gif $(EXTRA_RUN_ARGS)
+	$(EXTRA_RUN_ARGS)
 
 .PHONY: test
 test:
