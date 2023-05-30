@@ -63,7 +63,7 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err := collection.InsertOne(ctx, cdevent)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("Error With Mongo: %s\n", err)
 	}
 
 	fmt.Printf("Inserted document with _id: %v\n", result.InsertedID)
