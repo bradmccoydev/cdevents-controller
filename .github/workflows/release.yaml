@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - '[0-9]+.[0-9]+.x'
 
 permissions:
   id-token: write
@@ -37,6 +38,10 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ env.GITHUB_TOKEN }}
+
+    - name: Extract branch name
+      id: extract_branch
+      uses: keptn/gh-action-extract-branch-name@main
     
     - name: Prepare
       id: prep
@@ -48,6 +53,14 @@ jobs:
         echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
         echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
         echo "REVISION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+
+    - name: Get current date and time
+      id: get_datetime
+      run: |
+        DATETIME=$(date +'%Y%m%d%H%M')
+        BUILD_TIME=$(date -u "+%F_%T")
+        echo "DATETIME=$DATETIME" >> "$GITHUB_OUTPUT"
+        echo "BUILD_TIME=$BUILD_TIME" >> "$GITHUB_OUTPUT"
 
     - name: Generate images meta
       id: meta
@@ -71,7 +84,10 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-            REVISION=${{ steps.prep.outputs.REVISION }}      
+            REVISION=${{ steps.prep.outputs.REVISION }}
+            GIT_HASH=${{ steps.extract_branch.outputs.GIT_SHA }}
+            RELEASE_VERSION=${{ steps.get_datetime.outputs.DATETIME }}
+            BUILD_TIME=${{ steps.get_datetime.outputs.BUILD_TIME }}
     
     - name: Sign container image
       env:
@@ -80,7 +96,6 @@ jobs:
         COSIGN_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
       run: |
         cosign sign ghcr.io/bradmccoydev/cdevents-controller:latest --yes
-        cosign sign ghcr.io/bradmccoydev/cdevents-controller:${{ steps.prep.outputs.VERSION }} --yes
 
     # - name: Generate SBOM
     #   uses: anchore/sbom-action@4d571ad1038a9cc29d676154ef265ab8f9027042 # v0.14.2
