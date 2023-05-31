@@ -2,10 +2,10 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -28,7 +28,7 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	key := mux.Vars(r)["key"]
 	body, err := io.ReadAll(r.Body)
-	fmt.Printf("key: %s, body: %s", key, body)
+	log.Printf("key: %s, body: %s", key, body)
 	if err != nil {
 		s.ErrorResponse(w, r, span, "reading the request body failed", http.StatusBadRequest)
 		return
@@ -36,12 +36,17 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	var cdevent CDEvent
 	if err := yaml.Unmarshal(body, &cdevent); err != nil {
-		log.Fatal(err)
+		log.Printf("Error Unmarshalling CDEvent: %s", err)
 	}
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(s.config.MongodbURL))
+	mongoURL := os.Getenv("MONGODB_URL")
+	log.Printf("Mongo URL is: %s", mongoURL)
+
+	//client, err := mongo.NewClient(options.Client().ApplyURI(s.config.MongodbURL))
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURL))
+
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error Getting MongoDB Client: %s", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -49,12 +54,12 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error Connecting to Mongo: %s\n", err)
 	}
 
 	defer func() {
 		if err = client.Disconnect(ctx); err != nil {
-			log.Fatal(err)
+			log.Printf("Error Disconnecting from Mongo: %s\n", err)
 		}
 	}()
 
@@ -63,10 +68,10 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err := collection.InsertOne(ctx, cdevent)
 	if err != nil {
-		fmt.Printf("Error With Mongo: %s\n", err)
+		log.Printf("Error With Mongo: %s\n", err)
 	}
 
-	fmt.Printf("Inserted document with _id: %v\n", result.InsertedID)
+	log.Printf("Inserted document with _id: %v\n", result.InsertedID)
 
 	s.JSONResponse(w, r, body)
 }
