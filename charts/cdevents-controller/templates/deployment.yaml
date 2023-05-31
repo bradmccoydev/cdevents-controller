@@ -88,7 +88,7 @@ spec:
             - --h2c
             {{- end }}
           env:
-          - name: cdevents-controller_MONGODB_URL
+          - name: MONGODB_URL
             valueFrom:
               secretKeyRef:
                 name: mongodb
