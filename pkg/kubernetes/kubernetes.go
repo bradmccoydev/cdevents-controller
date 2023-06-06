@@ -2,7 +2,6 @@ package kubernetes
 
 import (
 	"context"
-	"fmt"
 
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,10 +45,8 @@ func GetResults(logger *zap.Logger) {
 			logger.Info("Failed to extract text field from Result object")
 		}
 
-		fmt.Println("*****")
-		fmt.Println("Name:", name)
-		fmt.Println("Error Text:", errorText)
-		fmt.Println("Details:", details)
-		fmt.Println("*****")
+		logger.Info("K8sgpt - ", zap.String("Name: ", name))
+		logger.Info("K8sgpt - ", zap.String("Error Text: ", errorText))
+		logger.Info("K8sgpt - ", zap.String("Details: ", details))
 	}
 }

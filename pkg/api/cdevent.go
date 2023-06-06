@@ -43,7 +43,7 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	kubernetes.GetResults(s.logger)
-	prometheus.PushGaugeMetric("cdevents_deployed", 1)
+	prometheus.PushGaugeMetric(s.logger, "cdevents_deployed", 1)
 
 	mongoURL := os.Getenv("MONGODB_URL")
 	log.Printf("Mongo URL is: %s", mongoURL)
