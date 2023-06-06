@@ -8,9 +8,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/bradmccoydev/cdevents-controller/pkg/kubernetes"
+	"github.com/bradmccoydev/cdevents-controller/pkg/prometheus"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
 
@@ -36,10 +39,11 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	var cdevent CDEvent
 	if err := yaml.Unmarshal(body, &cdevent); err != nil {
-		log.Printf("Error Unmarshalling CDEvent: %s", err)
+		s.logger.Error("Error Unmarshalling CDEvent", zap.Error(err))
 	}
 
-	//PushGaugeMetric("cdevents_deployed", 1)
+	kubernetes.GetResults(s.logger)
+	prometheus.PushGaugeMetric("cdevents_deployed", 1)
 
 	mongoURL := os.Getenv("MONGODB_URL")
 	log.Printf("Mongo URL is: %s", mongoURL)
@@ -48,7 +52,7 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURL))
 
 	if err != nil {
-		log.Printf("Error Getting MongoDB Client: %s", err)
+		s.logger.Error("Error Getting MongoDB Client", zap.Error(err))
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -56,7 +60,7 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = client.Connect(ctx)
 	if err != nil {
-		log.Printf("Error Connecting to Mongo: %s\n", err)
+		s.logger.Error("Error Connecting to Mongo:", zap.Error(err))
 	}
 
 	defer func() {
