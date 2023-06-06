@@ -7,7 +7,7 @@ import (
 )
 
 func PushGaugeMetric(logger *zap.Logger, metricName string, metricValue float64) {
-	pushGatewayURL := "http://prometheus-pushgateway.observability:9091/metrics"
+	pushGatewayURL := "http://prometheus-pushgateway.observability:9091"
 
 	gauge := prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: metricName,

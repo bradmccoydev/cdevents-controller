@@ -24,6 +24,7 @@ jobs:
     steps:
     - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3
     - uses: sigstore/cosign-installer@dd6b2e2b610a11fd73dd187a43d57cc1394e35f9 # v3.0.5
+    - uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18 # v2.1.0
 
     - name: Set up Docker Buildx
       id: buildx
@@ -88,15 +89,16 @@ jobs:
             GIT_HASH=${{ steps.extract_branch.outputs.GIT_SHA }}
             RELEASE_VERSION=${{ steps.get_datetime.outputs.DATETIME }}
             BUILD_TIME=${{ steps.get_datetime.outputs.BUILD_TIME }}
-    
-    - name: Sign container image
-      env:
-        IMAGE_DIGEST: ${{ steps.docker_build_image.outputs.digest }}
-        COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
-        COSIGN_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
-      run: |
-        cosign sign ghcr.io/bradmccoydev/cdevents-controller:latest --yes
 
+    - name: Sign image with key
+      run: |
+        cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${TAGS}@${DIGEST}"
+      env:
+        TAGS: ${{ steps.meta.outputs.tags }}
+        COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        DIGEST: ${{ steps.docker_build_image.outputs.digest }}
+    
     # - name: Generate SBOM
     #   uses: anchore/sbom-action@4d571ad1038a9cc29d676154ef265ab8f9027042 # v0.14.2
     #   with:
