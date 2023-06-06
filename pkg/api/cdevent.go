@@ -39,6 +39,8 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error Unmarshalling CDEvent: %s", err)
 	}
 
+	//PushGaugeMetric("cdevents_deployed", 1)
+
 	mongoURL := os.Getenv("MONGODB_URL")
 	log.Printf("Mongo URL is: %s", mongoURL)
 
