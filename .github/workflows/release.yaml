@@ -69,9 +69,7 @@ jobs:
       with:
         images: |
           ghcr.io/${{ env.IMAGE_NAME }}
-        tags: |
-          type=raw,value=${{ steps.prep.outputs.VERSION }}
-          type=raw,value=latest
+        tags: type=sha,format=long
     
     - name: Build Docker Image
       id: docker_build_image
