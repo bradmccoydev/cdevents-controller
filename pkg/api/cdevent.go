@@ -42,10 +42,9 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 		s.logger.Error("Error Unmarshalling CDEvent", zap.Error(err))
 	}
 
-	prometheus.PushGaugeMetric(s.logger, fmt.Sprintf("cdevents_%s", cdevent.Subject.Type), 1)
+	prometheus.PushGaugeMetric(s.logger, fmt.Sprintf("cdevents_%s", cdevent.Subject.Type), 1, cdevent.Context.ID, cdevent.Context.Type, cdevent.Subject.Type)
 
 	mongoURL := os.Getenv("MONGODB_URL")
-	log.Printf("Mongo URL is: %s", mongoURL)
 
 	//client, err := mongo.NewClient(options.Client().ApplyURI(s.config.MongodbURL))
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURL))
