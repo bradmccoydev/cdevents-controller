@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/bradmccoydev/cdevents-controller/pkg/kubernetes"
 	"github.com/bradmccoydev/cdevents-controller/pkg/prometheus"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -43,7 +42,6 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 		s.logger.Error("Error Unmarshalling CDEvent", zap.Error(err))
 	}
 
-	kubernetes.GetResults(s.logger)
 	prometheus.PushGaugeMetric(s.logger, fmt.Sprintf("cdevents_%s", cdevent.Subject.Type), 1)
 
 	mongoURL := os.Getenv("MONGODB_URL")
