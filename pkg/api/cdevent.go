@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -43,7 +44,7 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	kubernetes.GetResults(s.logger)
-	prometheus.PushGaugeMetric(s.logger, "cdevents_deployed", 1)
+	prometheus.PushGaugeMetric(s.logger, fmt.Sprintf("cdevents_%s", cdevent.Subject.Type), 1)
 
 	mongoURL := os.Getenv("MONGODB_URL")
 	log.Printf("Mongo URL is: %s", mongoURL)
@@ -84,17 +85,30 @@ func (s *Server) cdEventHandler(w http.ResponseWriter, r *http.Request) {
 
 type CDEvent struct {
 	Context struct {
-		Version   string    `json:"version"`
-		ID        string    `json:"id"`
-		Source    string    `json:"source"`
-		Type      string    `json:"type"`
-		Timestamp time.Time `json:"timestamp"`
+		Version   string `json:"version"`
+		ID        string `json:"id"`
+		Source    string `json:"source"`
+		Type      string `json:"type"`
+		Timestamp string `json:"timestamp"`
 	} `json:"context"`
 	Subject struct {
 		ID      string `json:"id"`
 		Source  string `json:"source"`
 		Type    string `json:"type"`
 		Content struct {
+			Description string `json:"description"`
+			Environment struct {
+				ID     string `json:"id"`
+				Source string `json:"source"`
+			} `json:"environment"`
+			TicketURI string `json:"ticketURI"`
 		} `json:"content"`
 	} `json:"subject"`
+	CustomData struct {
+		Severity   string `json:"severity"`
+		Priority   string `json:"priority"`
+		ReportedBy string `json:"reportedBy"`
+		IssueType  string `json:"issueType"`
+	} `json:"customData"`
+	CustomDataContentType string `json:"customDataContentType"`
 }

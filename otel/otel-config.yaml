@@ -8,7 +8,7 @@ processors:
 
 exporters:
   jaeger:
-    endpoint: jaeger-tracing-collector:14250
+    endpoint: http://jaeger-tracing-collector.observability:14250
     tls:
       insecure: true
 
@@ -23,4 +23,4 @@ service:
     traces:
       receivers: [otlp]
       processors: []
-      exporters: [jaeger]
+      exporters: [logging,jaeger]
